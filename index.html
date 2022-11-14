@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+*{
+    text-align: center;
+}
+#tengah{
+    margin-top: 330px;
+    margin-bottom: 70px;
+}
+#restart{
+    position: fixed;
+    border-radius: 10px;
+    width: 300px;
+    height: 210px;
+    background: linear-gradient(#eae5c9, #6cc6cb);
+    top: 50%;
+    left: 51%;
+    transform: translate(-50%,-50%);
+}
+#win{
+    position: fixed;
+    border-radius: 10px;
+    width: 300px;
+    height: 210px;
+    background: linear-gradient(#eae5c9, #6cc6cb);
+    top: 50%;
+    left: 51%;
+    transform: translate(-50%,-50%);
+}
+div{
+    text-align: center;
+    margin-top: 20px;
+}
+
+.border{
+    border: solid black;
+    width: 100%;
+    height: 633px;
+    margin-top: 8px;
+    margin-right: 8px;
+    background: url("bg.png"),black;
+    background-size: 100% 100%;
+}
+button{
+    width: 282px;
+    height: 45.63px;
+    background: #FAFF0E;
+    font-family: 'Iner';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 24px;
+}
+.buttonrst{
+    width: 200px;
+    height: 40px;
+    background:#FAFF0E;
+    border-radius:59px;
+    font-family: 'Iner';
+    font-style: normal;
+}
+.win{
+    width: 100px;
+    height: 30px;
+    background:#FAFF0E;
+    border-radius:59px;
+    font-family: 'Iner';
+    font-style: normal;
+}
+#kembali{
+    position: absolute;
+    top: 40px;
+    left: 20px;
+}
+button:hover{
+    background:#b6aa0c;
+}
+canvas {
+    border: solid 3px #032361;
+    /* width: 100%;
+    height: 633px;
+    background-size: 100% 100%; */
+}
+</style>
+</head>
+<body>
+    <div class="border">
+        <div id="tengah">
+            <div id="UI">
+                <div>
+                    <button onclick="menuLevel()">START</button>
+                </div>
+                <!-- <div>
+                    <button onclick="">SETTING</button>
+                </div> -->
+                <div>
+                    <button onclick="keTentang()">ABOUT</button>
+                </div>
+            </div>
+            <div id="LEVEL" style="display: none;">
+                <button onclick="level(1)">LEVEL 1</button><br>
+                <button onclick="level(2)">LEVEL 2</button><br>
+                <button onclick="level(3)">LEVEL 3</button>
+            </div>
+            <div id="tentang" style="display: none;">
+                <!-- ISI TERSERAH KAH -->
+                <h1>BELUM ADA</h1>
+            </div>
+        </div>
+    </div>
+    <button id="kembali" onclick="back()" style="display: none;">KEMBALI</button>
+    <div id="restart" style="display: none;">
+    <h1 >ANDA KALAH</h1><br>
+    <button onclick="startGame()" class="buttonrst">RESTART</button>
+    </div>
+    <div id="win" style="display: none;">
+        <h1>SELAMAT ANDA MENANG!</h1><br>
+        <button onclick="startGame()" class="win">RESTART</button>
+        <button id="next" style="display: none;" onclick="nextlvl()" class="win">NEXT</button>
+        </div>
+<script>
+    var myGamePiece;
+    var myBackground;
+    var myfinish;
+    var myObstacles = [];
+    var myScore;
+    var tingkat = 1
+    var map = document.querySelector('.border');
+
+    function menuLevel(){
+        document.getElementById('UI').style.display = 'none';
+        document.getElementById('LEVEL').style.display = '';
+    }
+    function keTentang(){
+        document.getElementById('tentang').style.display = '';
+        document.getElementById('kembali').style.display = '';
+        document.getElementById('UI').style.display = "none";
+    }
+    function back(){
+        document.getElementById('UI').style.display = "";
+        document.getElementById('tentang').style.display = 'none';
+        document.getElementById('kembali').style.display = 'none';
+    }
+    function level(i){
+        tingkat = i;
+        startGame();
+    }
+    function nextlvl(){
+        tingkat += 1;
+        startGame();
+    }
+    function startGame() {
+        myGamePiece = new component(50, 50, "karakter.png", 10, 120, "image");
+        myBackground = new component(1360, 630, "bg.png", 0, 0, "image");
+        myfinish = new component(30, 30, "coin.png", 1300, 100, "image");
+        myScore = new component("30px", "Consolas", "black", 650, 50, "text");
+        myGameArea.start();
+        map.style.display = "none";
+
+        document.getElementById('restart').style.display = "none";
+        document.getElementById('win').style.display = "none";
+        document.getElementById('next').style.display = "none";
+        myObstacles.splice(0,myObstacles.length)
+    }
+
+    function rst(){
+    document.querySelector('#restart').style.display = "none";
+    document.querySelector('#win').style.display = "none"
+}
+
+
+    var myGameArea = {
+        canvas : document.createElement("canvas"),
+        start : function() {
+            this.canvas.width = 1360;
+            this.canvas.height = 630;
+            this.context = this.canvas.getContext("2d");
+            document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+            this.frameNo = 0;
+            this.interval = setInterval(updateGameArea, 20);
+            window.addEventListener('keydown', function (e) {
+            myGameArea.key = e.keyCode;
+            })
+            window.addEventListener('keyup', function (e) {
+            myGameArea.key = false;
+            })
+            },
+        clear : function() {
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        },
+        stop : function() {
+            clearInterval(this.interval);
+            document.getElementById('restart').style.display = "";
+        },
+        menang : function() {
+        clearInterval(this.interval);
+        document.getElementById('win').style.display = "";
+        document.getElementById('next').style.display = "";
+    }
+    }
+
+    function component(width, height, color, x, y, type) {
+    this.type = type;
+    if (type == "image") {
+    this.image = new Image();
+    this.image.src = color;
+    }
+    this.width = width;
+    this.height = height;
+    this.speedX = 0;
+    this.speedY = 0;    
+    this.x = x;
+    this.y = y;    
+    this.update = function() {
+        ctx = myGameArea.context;
+        if (this.type=="text"){
+            ctx.font = this.width+" "+this.height;
+            ctx.fillStyle = color;
+            ctx.fillText(this.text,this.x,this.y);
+        }
+        ctx = myGameArea.context;
+        if (type == "image") {
+        ctx.drawImage(this.image,
+        this.x,
+        this.y,
+        this.width, this.height);
+        } else {
+            ctx.fillStyle = color;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+    }
+    this.newPos = function() {
+        this.x += this.speedX;
+        this.y += this.speedY; 
+        this.hitTop();
+        this.hitLeft();
+        this.hitBot();
+    }
+    this.hitTop = function(){
+        let top = 0
+        if(this.y < top){
+            this.y = top
+        }
+    }
+    this.hitLeft = function(){
+        let Left = 0
+        if(myGamePiece.x < Left){
+            myGamePiece.x = Left
+        }
+    }
+    this.hitBot = function(){
+        let Bot = myGameArea.canvas.height - myGamePiece.height;
+        if(this.y > Bot){
+            this.y = Bot;
+        }
+    }
+    this.crashWith = function(otherobj) {
+        var myleft = this.x;
+        var myright = this.x + (this.width);
+        var mytop = this.y;
+        var mybottom = this.y + (this.height);
+        var otherleft = otherobj.x;
+        var otherright = otherobj.x + (otherobj.width);
+        var othertop = otherobj.y;
+        var otherbottom = otherobj.y + (otherobj.height);
+        var crash = true;
+        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+            crash = false;
+        }
+        return crash;
+    }
+}
+    function updateGameArea() {
+        var x, height, gap, minHeight, maxHeight, minGap, maxGap;
+        for (i = 0; i < myObstacles.length; i += 1) {
+            if (myGamePiece.crashWith(myObstacles[i])) {
+                myGameArea.stop();
+                document.getElementById('restart h1').innerHTML = "";
+                return;
+            }else if(myGamePiece.crashWith(myfinish)){
+                setTimeout(function(){
+                    myGameArea.menang();
+                },800)
+            }
+        }
+        myGameArea.clear();
+        myGamePiece.speedX = 0;
+        myGamePiece.speedY = 0;
+        if(tingkat==1){
+            if (myGameArea.key && myGameArea.key == 65) {myGamePiece.speedX = -1; }
+            if (myGameArea.key && myGameArea.key == 68) {myGamePiece.speedX = 1; }
+            if (myGameArea.key && myGameArea.key == 87) {myGamePiece.speedY = -1; }
+            if (myGameArea.key && myGameArea.key == 83) {myGamePiece.speedY = 1; }
+        }else{
+            if (myGameArea.key && myGameArea.key == 65) {myGamePiece.speedX = -2.5; }
+            if (myGameArea.key && myGameArea.key == 68) {myGamePiece.speedX = 2.5; }
+            if (myGameArea.key && myGameArea.key == 87) {myGamePiece.speedY = -3; }
+            if (myGameArea.key && myGameArea.key == 83) {myGamePiece.speedY = 3; }
+        }
+        myBackground.newPos();
+        myBackground.update();
+        myGameArea.frameNo += 1;
+        if(tingkat==1){
+            if (myGameArea.frameNo == 1 || everyinterval(130)) {
+                x = myGameArea.canvas.width;
+                minHeight = 20;
+                maxHeight = 250;
+                height = Math.floor(Math.random()*(maxHeight-minHeight+1)+minHeight);
+                minGap = 100;
+                maxGap = 250;
+                gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
+                myObstacles.push(new component(30, height, "#6ADA42", x, 0));
+                myObstacles.push(new component(30, x - height - gap, "#6ADA42", x, height + gap));
+            }
+            for (i = 0; i < myObstacles.length; i += 1) {
+                myObstacles[i].speedX = -3;
+                myObstacles[i].newPos();
+                myObstacles[i].update();
+            }   
+        }else{
+            if (myGameArea.frameNo == 1 || everyinterval(50)) {
+                x = myGameArea.canvas.width;
+                minHeight = 20;
+                maxHeight = 250;
+                height = Math.floor(Math.random()*(maxHeight-minHeight+1)+minHeight);
+                minGap = 100;
+                maxGap = 250;
+                gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
+                myObstacles.push(new component(10, height, "#6ADA42", x, 0));
+                myObstacles.push(new component(10, x - height - gap, "#6ADA42", x, height + gap));
+            }
+            for (i = 0; i < myObstacles.length; i += 1) {
+                myObstacles[i].speedX = -7;
+                myObstacles[i].newPos();
+                myObstacles[i].update();
+            }   
+
+        }
+        myScore.text="TIME: " + myGameArea.frameNo;
+        myScore.update();
+        myGamePiece.newPos();    
+        myGamePiece.update();
+        myfinish.newPos();
+        myfinish.update();
+    }
+
+    function everyinterval(n) {
+        if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
+        return false;
+    }
+</script>
+</body>
+</html>
